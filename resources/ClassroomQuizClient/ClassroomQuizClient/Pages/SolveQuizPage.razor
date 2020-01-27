@@ -1,0 +1,86 @@
+﻿@page "/solvequizpage"
+@using ClassroomQuizClient.Pages.SolvePageComponents;
+
+<p>@Quiz.Title</p>
+@if (screenopened == 1)
+{
+    <p>Quiz time left: @Quiz.TimeLimit</p>
+}
+    @if (Questions != null)
+    {
+        @if (screenopened == 1)
+        {
+            <QuestionComponent @key="@questiontempid" Question="@Questions[currentquestion]" OnContinue="@(async (args) => await ToNextQuestionAsync(args))"></QuestionComponent>
+        }
+
+        @if (screenopened == 2)
+        {
+            <EndScreen correct="@correctanswers" total="@Questions.Count"></EndScreen>
+        }
+    }
+
+    @code {
+
+        // 1 for solve, 2 for end screen
+        int screenopened = 1;
+
+
+        string questiontempid;
+        #region quiz data
+
+        ClassroomQuizClient.DataModels.Quizzes.FullQuiz Quiz;
+        List<ClassroomQuizClient.DataModels.Questions.FullQuestion> Questions;
+
+protected override Task OnInitializedAsync()
+    {
+        Quiz = GeneralData.CurrentQuiz.Quiz;
+        Questions = GeneralData.CurrentQuiz.Questions;
+        CheckTime();
+        return base.OnInitializedAsync();
+    }
+
+    //
+    int correctanswers = 0;
+    #endregion
+
+    int currentquestion = 0;
+
+
+    Task ToNextQuestionAsync(bool iscorrect)
+    {
+        if (iscorrect)
+        {
+            correctanswers++;
+        }
+
+        if (Questions.Count == currentquestion + 1)
+        {
+            screenopened = 2;
+            return Task.CompletedTask;
+        }
+        questiontempid = DateTime.UtcNow.Ticks.ToString();
+        currentquestion++;
+
+        return Task.CompletedTask;
+    }
+
+
+
+    #region Timing
+
+    async Task CheckTime()
+    {
+
+        while (Quiz.TimeLimit > 0)
+        {
+            await Task.Delay(1000);
+            Quiz.TimeLimit--;
+            StateHasChanged();
+        }
+        screenopened = 2;
+        StateHasChanged();
+    }
+    #endregion
+
+
+    }

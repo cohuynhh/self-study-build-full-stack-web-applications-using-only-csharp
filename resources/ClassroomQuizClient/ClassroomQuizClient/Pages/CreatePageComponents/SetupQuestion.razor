@@ -1,0 +1,77 @@
+﻿<p>Question</p>
+<p><input @bind="@Question.Question" /></p>
+<p>Time limit</p>
+<p><input @bind="@Question.TimeLimit" /></p>
+<p>Number of answers</p>
+<p><button @onclick="@(async () => await ChangeNumberOfAnswersAsync(2))">2</button><button @onclick="@(async () => await ChangeNumberOfAnswersAsync(3))">3</button><button @onclick="@(async () => await ChangeNumberOfAnswersAsync(4))">4</button></p>
+<p>Correct answer: @Question.Answer</p>
+
+
+
+
+<p>Answer 1</p>
+<p><input @bind="@Question.A1" /></p>
+<p><button @onclick="@(() => { Question.Answer = 1; })">Set answer 1 as correct</button></p>
+<p>Answer 2</p>
+<p><input @bind="@Question.A2" /></p>
+<p><button @onclick="@(() => { Question.Answer = 2; })">Set answer 2 as correct</button></p>
+
+@if (numberofanswers >= 3)
+{
+    <p>Answer 3</p>
+    <p><input @bind="@Question.A3" /></p>
+    <p><button @onclick="@(() => { Question.Answer = 3; })">Set answer 3 as correct</button></p>
+}
+
+@if (numberofanswers == 4)
+{
+    <p>Answer 4</p>
+    <p><input @bind="@Question.A4" /></p>
+    <p><button @onclick="@(() => { Question.Answer = 4; })">Set answer 4 as correct</button></p>
+}
+
+
+<p><button @onclick="@(async () => await SubmitAsync())">Submit</button></p>
+
+@code {
+
+    [Parameter]
+    public string QuizId { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+
+    protected override void OnParametersSet()
+    {
+        Question.QuizId = QuizId;
+        base.OnParametersSet();
+    }
+
+    int numberofanswers = 2;
+
+    DataModels.Questions.NewQuestion Question = new DataModels.Questions.NewQuestion() { Answer = 1 };
+
+    Task ChangeNumberOfAnswersAsync(int newnumber)
+    {
+        numberofanswers = newnumber;
+
+        return Task.CompletedTask;
+    }
+
+    async Task SubmitAsync()
+    {
+        try
+        {
+            bool result = await GeneralData.Http.PostJsonAsync<bool>("/Questions/InsertQuestion", Question);
+            if (result)
+            {
+              await  OnSubmit.InvokeAsync(null);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+}

@@ -1,0 +1,146 @@
+﻿
+
+@if (Question != null)
+{
+
+    @if (!is_submitted)
+    {
+
+        <p>Time left for question: @Question.TimeLimit  Seconds</p>
+        <p>@Question.Question</p> 
+
+        @if (selected_answer == 1)
+        {
+            <p><button style="background-color: rgba(0, 255, 255, 0.64)">@Question.A1</button></p>
+        }
+        else
+        {
+            <p><button @onclick="@(async () => await SelectAnswer(1))" style="background-color: rgba(0, 148, 255, 0.76)">@Question.A1</button></p>
+        }
+
+
+        @if (selected_answer == 2)
+        {
+            <p><button style="background-color: rgba(0, 255, 255, 0.64)">@Question.A2</button></p>
+        }
+        else
+        {
+            <p><button @onclick="@(async () => await SelectAnswer(2))" style="background-color: rgba(0, 148, 255, 0.76)">@Question.A2</button></p>
+        }
+
+        @if (Question.A3 != "")
+        {
+
+
+            @if (selected_answer == 3)
+            {
+                <p><button style="background-color: rgba(0, 255, 255, 0.64)">@Question.A3</button></p>
+            }
+            else
+            {
+                <p><button @onclick="@(async () => await SelectAnswer(3))" style="background-color: rgba(0, 148, 255, 0.76)">@Question.A3</button></p>
+            }
+        }
+
+        @if (Question.A4 != "")
+        {
+
+            @if (selected_answer == 4)
+            {
+                <p><button style="background-color: rgba(0, 255, 255, 0.64)">@Question.A4</button></p>
+            }
+            else
+            {
+                <p><button @onclick="@(async () => await SelectAnswer(4))" style="background-color: rgba(0, 148, 255, 0.76)">@Question.A4</button></p>
+            }
+        }
+
+            <p><button @onclick="@(async () => await Submit())">Submit</button></p>
+        }
+        else
+        {
+            <p>@answer</p>
+            <p><button @onclick="@(async () => await ContinueQuiz())">Continue</button></p>
+        }
+
+    }
+
+    @code {
+
+[Parameter]
+    public EventCallback<bool> OnContinue { get; set; }
+
+    [Parameter]
+    public DataModels.Questions.FullQuestion Question { get; set; }
+
+
+    int selected_answer = 0;
+
+
+    Task SelectAnswer(int answerid)
+    {
+        selected_answer = answerid;
+
+        return Task.CompletedTask;
+    }
+
+
+    bool is_submitted = false;
+    string answer = "";
+
+    Task Submit()
+    {
+        is_submitted = true;
+        if (selected_answer == Question.Answer)
+        {
+            answer = "Correct";
+        }
+        else
+        {
+            answer = "Wrong";
+        }
+        return Task.CompletedTask;
+    }
+
+    async Task ContinueQuiz()
+    {
+        if (selected_answer == Question.Answer)
+        {
+            await OnContinue.InvokeAsync(true);
+        }
+        else
+        {
+            await OnContinue.InvokeAsync(false);
+        }
+    }
+
+    #region Timing
+
+    protected override async Task OnInitializedAsync()
+    {
+        CheckTime();
+    }
+
+
+    async Task CheckTime()
+    {
+
+        while (Question.TimeLimit > 0)
+        {
+            await Task.Delay(1000);
+            Question.TimeLimit--;
+            StateHasChanged();
+        }
+        is_submitted = true;
+        if (selected_answer == Question.Answer)
+        {
+            answer = "Correct";
+        }
+        else
+        {
+            answer = "Wrong";
+        }
+        StateHasChanged();
+    }
+    #endregion
+    }

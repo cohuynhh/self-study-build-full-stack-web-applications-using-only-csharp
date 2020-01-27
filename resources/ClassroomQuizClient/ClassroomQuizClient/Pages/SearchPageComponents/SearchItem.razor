@@ -1,0 +1,87 @@
+﻿@inject NavigationManager navigation
+
+
+@if (QuizPartial != null)
+{
+
+
+<div class="col-md-4">
+    <p>@QuizPartial.Title</p>
+    <p>@QuizPartial.Id</p>
+    @if (!expanded)
+    {
+    <p><button @onclick="@(async () => await ExpandAsync())">Expand</button></p>
+    }
+
+    @if (expanded)
+    {
+        <p>Time limit: @FullQuiz.TimeLimit seconds</p>
+        <p>@FullQuiz.Description</p>
+        <p><button @onclick="@(async () => await BeginAsync())">Begin</button></p>
+    }
+
+</div>
+}
+else
+{
+<div class="col-md-4">
+    <p>Loading...</p>
+</div>
+}
+
+    @code {
+
+        #region Parameters
+
+        [Parameter]
+        public DataModels.Quizzes.QuizForSearch QuizPartial { get; set; }
+
+
+        #endregion
+
+
+
+        bool expanded = false;
+
+        DataModels.Quizzes.FullQuiz FullQuiz;
+
+
+        async Task ExpandAsync()
+        {
+            try
+            {
+                var partialquiz = await GeneralData.Http.GetJsonAsync<DataModels.Quizzes.ExpandedQuiz>("/Quiz/RetrieveQuizDetails?quizid="+ QuizPartial.Id);
+                FullQuiz = new DataModels.Quizzes.FullQuiz();
+                FullQuiz.Description = partialquiz.Description;
+                FullQuiz.TimeLimit = partialquiz.TimeLimit;
+                FullQuiz.Id = QuizPartial.Id;
+                FullQuiz.Title = QuizPartial.Title;
+                expanded = true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        async Task BeginAsync()
+        {
+            try
+            {
+                GeneralData.CurrentQuiz.Quiz = FullQuiz;
+
+
+                GeneralData.CurrentQuiz.Questions =
+                    await GeneralData.Http.GetJsonAsync<List<ClassroomQuizClient.DataModels.Questions.FullQuestion>>
+                    ("/Questions/GetQuestions?quizid="+ FullQuiz.Id);
+
+
+                navigation.NavigateTo("/solvequizpage");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+             
+        }
+    }

@@ -1,0 +1,29 @@
+﻿@page "/testpage3"
+@inject NavigationManager navmanager
+@using System.Web;
+
+<h3>TestPage3</h3>
+<p>parameter 1: @variable1</p>
+<p>parameter 2: @variable2</p>
+<p><button @onclick="@GetParameters">Get parameters</button></p>
+<p><button @onclick="@NavigateToPage2">Navigate to page 2</button></p>
+@code {
+
+    string variable1;
+    string variable2;
+
+    void NavigateToPage2()
+    {
+        navmanager.NavigateTo("/testpage2/from3");
+    }
+
+    void GetParameters()
+    { 
+        var aburi = new Uri(navmanager.Uri);
+
+        var qparams = HttpUtility.ParseQueryString(aburi.Query);
+
+        variable1 = qparams["param1"];
+        variable2 = qparams["param2"];
+    }
+}

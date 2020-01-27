@@ -1,0 +1,27 @@
+﻿@page "/searchquizzes"
+@using ClassroomQuizClient.Pages.SearchPageComponents;
+
+@if (Quizzes != null)
+{
+    foreach (var item in Quizzes)
+    {
+        <SearchItem QuizPartial="item"></SearchItem>
+    }
+
+}
+
+@code {
+    List<DataModels.Quizzes.QuizForSearch> Quizzes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Quizzes = await GeneralData.Http.GetJsonAsync<List<DataModels.Quizzes.QuizForSearch>>("/Quiz/RetrieveQuizForSearch");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+}

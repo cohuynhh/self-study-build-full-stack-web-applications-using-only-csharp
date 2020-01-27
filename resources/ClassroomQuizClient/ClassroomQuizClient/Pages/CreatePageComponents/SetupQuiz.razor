@@ -1,0 +1,40 @@
+﻿<p>Title</p>
+<p><input @bind="@Quiz.Title" /></p>
+<p>Description</p>
+<p><input @bind="@Quiz.Description" /></p>
+<p>Time limit</p>
+<p><input @bind="@Quiz.TimeLimit" /></p>
+<p><button @onclick="@(async () => await SubmitAsync())">Submit</button></p>
+<p style="color:#ff0000">@error</p>
+@code {
+    DataModels.Quizzes.NewQuiz Quiz = new DataModels.Quizzes.NewQuiz();
+
+    [Parameter]
+    public EventCallback<string> OnSubmit  { get; set; }
+
+
+
+    string error = "";
+    async Task SubmitAsync()
+    {
+        try
+        {
+            string id = await GeneralData.Http.PostJsonAsync<string>("/Quiz/InsertNewQuiz",Quiz);
+            if (id != null && id != "")
+            {
+                await OnSubmit.InvokeAsync(id);
+            }
+            else
+            {
+ error = "something went wrong";
+            }
+
+        }
+        catch (Exception e)
+        {
+            error = "something went wrong";
+            Console.WriteLine(e.Message);
+        }
+
+    }
+}

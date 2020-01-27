@@ -1,0 +1,42 @@
+﻿@page "/createquizpage"
+@using ClassroomQuizClient.Pages.CreatePageComponents;
+
+@if (quizid == "")
+{
+    <SetupQuiz OnSubmit="@(async (id) => await AcceptQuizSubmissionAsync(id))"></SetupQuiz>
+}
+
+    @if (quizid != "")
+    {
+
+
+        <p><button @onclick="@(() => { questioncreateopened = true; })">Add question</button></p>
+
+        @if (questioncreateopened)
+        {
+            <SetupQuestion OnSubmit="@(async (args) => await AcceptQuestionSubmissionAsync())" QuizId="@quizid"></SetupQuestion>
+        }
+
+    }
+
+
+    @code {
+        bool questioncreateopened = false;
+        int numberofquestions = 0;
+
+        string quizid = "";
+
+        Task AcceptQuestionSubmissionAsync()
+        {
+            questioncreateopened = false;
+
+            return Task.CompletedTask;
+        }
+
+        Task AcceptQuizSubmissionAsync(string id)
+        {
+
+            quizid = id;
+            return Task.CompletedTask;
+        }
+    }

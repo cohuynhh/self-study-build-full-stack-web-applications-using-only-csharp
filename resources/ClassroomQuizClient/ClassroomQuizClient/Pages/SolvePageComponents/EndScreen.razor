@@ -1,0 +1,12 @@
+﻿<p>Quiz completed</p>
+<p>Score</p>
+<p>@correct/@total</p>
+<p>@(Math.Round(Convert.ToDouble(correct)/Convert.ToDouble(total) * 100,1)) %</p>
+
+@code {
+    [Parameter]
+    public int correct { get; set; }
+
+    [Parameter]
+    public int total { get; set; }
+}

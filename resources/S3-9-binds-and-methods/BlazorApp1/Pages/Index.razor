@@ -1,0 +1,26 @@
+﻿@page "/"
+
+<p><input @bind="@teststring" /></p>
+<p><input @bind="@testdate" type="date" /></p>
+<p>selected date: @testdate</p>
+<p>inserted text: @teststring</p>
+<p><button @onclick="@InsertToday">Insert today</button></p>
+<p><button @onclick="@(async () => await ShowText())">Show text</button></p>
+<p>Showing text:</p>
+<p>@texttoshow</p>
+@code {
+    string teststring;
+    DateTime testdate;
+    string texttoshow;
+
+    void InsertToday()
+    {
+        testdate = DateTime.Now;
+    }
+
+    Task ShowText()
+    {
+        texttoshow = teststring + ": " + testdate.ToString();
+        return Task.CompletedTask;
+    }
+}
